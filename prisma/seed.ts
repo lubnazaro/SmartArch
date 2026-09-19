@@ -30,11 +30,7 @@ async function main() {
       instagramUrl: "https://www.instagram.com/smartarch.group/",
       instagramHandle: "@smartarch.group",
       address: "Bethlehem / Jerusalem",
-      aboutEn: ABOUT_EN,
-      logoUrl: "/smart-arch-logo-web.png",
-      heroHeadlineEn: "Design meets technology",
-      heroSubEn:
-        "Architecture and interior design with seamless smart home systems for spaces that look beautiful and work beautifully.",
+      // Do not overwrite about/logo/hero if already customized in production
     },
     create: {
       id: "main",
@@ -52,17 +48,48 @@ async function main() {
     },
   });
 
+  // Fill empty about/logo defaults without clobbering edits
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "main" } });
+  if (settings) {
+    await prisma.siteSettings.update({
+      where: { id: "main" },
+      data: {
+        aboutEn: settings.aboutEn || ABOUT_EN,
+        logoUrl: settings.logoUrl || "/smart-arch-logo-web.png",
+        heroHeadlineEn: settings.heroHeadlineEn || "Design meets technology",
+        heroSubEn:
+          settings.heroSubEn ||
+          "Architecture and interior design with seamless smart home systems for spaces that look beautiful and work beautifully.",
+      },
+    });
+  }
+
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
 
   for (const admin of ADMINS) {
-    await prisma.user.upsert({
-      where: { email: admin.email },
-      update: {
-        name: admin.name,
-        passwordHash,
-        mustChangePassword: true,
-      },
-      create: {
+    const existing = await prisma.user.findUnique({ where: { email: admin.email } });
+    if (existing) {
+      // Never reset passwords on re-seed
+      if (!existing.passwordHash) {
+        await prisma.user.update({
+          where: { email: admin.email },
+          data: {
+            name: admin.name,
+            passwordHash,
+            mustChangePassword: true,
+          },
+        });
+      } else if (!existing.name) {
+        await prisma.user.update({
+          where: { email: admin.email },
+          data: { name: admin.name },
+        });
+      }
+      continue;
+    }
+
+    await prisma.user.create({
+      data: {
         email: admin.email,
         name: admin.name,
         passwordHash,
@@ -71,10 +98,7 @@ async function main() {
     });
   }
 
-  console.log("Seeded site settings and admin users:");
-  for (const admin of ADMINS) {
-    console.log(`  - ${admin.name} <${admin.email}> (must change password)`);
-  }
+  console.log("Seed complete (existing admin passwords preserved).");
 }
 
 main()

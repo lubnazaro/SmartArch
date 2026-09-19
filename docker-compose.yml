@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3847:3847"
+    environment:
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_URL: ${AUTH_URL:-http://127.0.0.1:3847}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://127.0.0.1:3847}
+      DATABASE_URL: file:/data/smartarch.db
+      DATA_DIR: /data
+    volumes:
+      - smartarch-data:/data
+    restart: unless-stopped
+
+volumes:
+  smartarch-data:
