@@ -1,7 +1,7 @@
 "use client";
 
 import type { Media, Project, ProjectTranslation } from "@prisma/client";
-import { MediaManager, type MediaDraft } from "@/components/admin/media-manager";
+import { MediaManager, mediaToDraft } from "@/components/admin/media-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +27,7 @@ export function ProjectForm({
   const en = t(project, "en");
   const ar = t(project, "ar");
   const he = t(project, "he");
-  const initialMedia: MediaDraft[] = (project?.media || []).map((m) => ({
-    type: m.type as MediaDraft["type"],
-    url: m.url,
-    caption: m.caption,
-  }));
+  const initialMedia = (project?.media || []).map(mediaToDraft);
 
   return (
     <form action={action} className="space-y-8">
@@ -146,9 +142,11 @@ export function ProjectForm({
       </section>
 
       <section className="space-y-4 border border-sand-200 p-4">
-        <h2 className="font-display text-xl">Photos, videos & Instagram</h2>
+        <h2 className="font-display text-xl">Project posts</h2>
         <p className="text-sm text-ink-soft/70">
-          Upload files or add Instagram links. After uploading a cover photo, copy its URL into Cover image URL above.
+          Add multiple posts to this project — image posts (Instagram/carousel URL or one or more photos)
+          and video/reel posts. Reorder with Up/Down. For the cover, paste an uploaded image URL into
+          Cover image URL above.
         </p>
         <MediaManager initial={initialMedia} />
       </section>

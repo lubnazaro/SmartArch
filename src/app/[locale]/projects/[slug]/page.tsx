@@ -9,7 +9,12 @@ import {
   getProjectBySlug,
   pickProjectTranslation,
 } from "@/lib/content";
+import { getMediaImageUrls, isInstagramUrl } from "@/lib/media";
 import { FadeIn } from "@/components/motion";
+
+function isLocalMediaUrl(url: string) {
+  return url.startsWith("/") || url.startsWith("data:");
+}
 
 export default async function ProjectDetailPage({
   params,
@@ -30,9 +35,7 @@ export default async function ProjectDetailPage({
       ? `/${locale}/smart-home`
       : `/${locale}/interior-design`;
 
-  const images = project.media.filter((m) => m.type === "IMAGE");
-  const videos = project.media.filter((m) => m.type === "VIDEO");
-  const instagram = project.media.filter((m) => m.type === "INSTAGRAM");
+  const posts = project.media;
 
   return (
     <div className="pb-20">
@@ -80,58 +83,95 @@ export default async function ProjectDetailPage({
           ) : null}
         </FadeIn>
 
-        {videos.length > 0 ? (
-          <div className="mt-14 space-y-6">
-            {videos.map((video) => (
-              <FadeIn key={video.id}>
-                <video
-                  src={video.url}
-                  controls
-                  className="w-full bg-ink"
-                  preload="metadata"
-                />
-              </FadeIn>
-            ))}
-          </div>
-        ) : null}
-
-        {instagram.length > 0 ? (
-          <div className="mt-10 space-y-3">
-            {instagram.map((item) => (
-              <a
-                key={item.id}
-                href={item.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-bronze hover:underline"
-              >
-                <InstagramIcon className="h-4 w-4" />
-                {item.caption || item.url}
-              </a>
-            ))}
-          </div>
-        ) : null}
-
-        {images.length > 0 ? (
-          <div className="mt-14">
+        {posts.length > 0 ? (
+          <div className="mt-14 space-y-10">
             <h2 className="font-display text-2xl text-ink">
               {dict.projects.gallery}
             </h2>
-            <div className="mt-6 grid gap-4">
-              {images.map((img, i) => (
-                <FadeIn key={img.id} delay={i * 0.04}>
-                  <div className="relative aspect-[4/3] overflow-hidden bg-sand-200">
-                    <Image
-                      src={img.url}
-                      alt={img.caption || t.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 768px"
-                    />
-                  </div>
+            {posts.map((post, i) => {
+              if (post.type === "VIDEO") {
+                const isFile = isLocalMediaUrl(post.url);
+                return (
+                  <FadeIn key={post.id} delay={i * 0.04}>
+                    <article className="space-y-3">
+                      {isFile ? (
+                        <video
+                          src={post.url}
+                          controls
+                          className="w-full bg-ink"
+                          preload="metadata"
+                        />
+                      ) : (
+                        <a
+                          href={post.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex text-bronze hover:underline"
+                        >
+                          {post.caption || post.url}
+                        </a>
+                      )}
+                      {post.caption && isFile ? (
+                        <p className="text-sm text-ink-soft/70">{post.caption}</p>
+                      ) : null}
+                    </article>
+                  </FadeIn>
+                );
+              }
+
+              if (post.type === "INSTAGRAM" || isInstagramUrl(post.url)) {
+                return (
+                  <FadeIn key={post.id} delay={i * 0.04}>
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 text-bronze hover:underline"
+                    >
+                      <InstagramIcon className="h-4 w-4" />
+                      {post.caption || post.url}
+                    </a>
+                  </FadeIn>
+                );
+              }
+
+              // IMAGE post — one or many photos
+              const urls = getMediaImageUrls(post);
+              return (
+                <FadeIn key={post.id} delay={i * 0.04}>
+                  <article className="space-y-3">
+                    <div className={urls.length > 1 ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"}>
+                      {urls.map((src) => (
+                        <div
+                          key={src}
+                          className="relative aspect-[4/3] overflow-hidden bg-sand-200"
+                        >
+                          {isLocalMediaUrl(src) ? (
+                            <Image
+                              src={src}
+                              alt={post.caption || t.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 768px"
+                            />
+                          ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={src}
+                              alt={post.caption || t.title}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {post.caption ? (
+                      <p className="text-sm text-ink-soft/70">{post.caption}</p>
+                    ) : null}
+                  </article>
                 </FadeIn>
-              ))}
-            </div>
+              );
+            })}
           </div>
         ) : null}
       </div>

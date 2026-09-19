@@ -4,12 +4,39 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  getMediaImageUrls,
+  isInstagramUrl,
+  parseUrlsJson,
+  serializeUrlsJson,
+  splitPostUrlField,
+  type MediaLike,
+} from "@/lib/media";
 
 export type MediaDraft = {
   type: "IMAGE" | "VIDEO" | "INSTAGRAM";
   url: string;
+  urls?: string[];
   caption?: string;
 };
+
+export function mediaToDraft(m: MediaLike): MediaDraft {
+  const extras = parseUrlsJson(m.urlsJson);
+  const urls =
+    m.type === "IMAGE"
+      ? getMediaImageUrls(m)
+      : extras.length
+        ? extras
+        : undefined;
+  return {
+    type: m.type as MediaDraft["type"],
+    url: m.url,
+    urls,
+    caption: m.caption || "",
+  };
+}
+
+type ComposerKind = "image" | "video" | null;
 
 export function MediaManager({
   initial = [],
@@ -19,20 +46,42 @@ export function MediaManager({
   name?: string;
 }) {
   const [items, setItems] = useState<MediaDraft[]>(initial);
-  const [instagramUrl, setInstagramUrl] = useState("");
+  const [composer, setComposer] = useState<ComposerKind>(null);
+  const [postUrl, setPostUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function onUpload(file: File, type: "IMAGE" | "VIDEO") {
+  function resetComposer() {
+    setComposer(null);
+    setPostUrl("");
+    setVideoUrl("");
+    setImageUrls([]);
+    setCaption("");
+    setError(null);
+  }
+
+  async function uploadFile(file: File): Promise<string> {
+    const body = new FormData();
+    body.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+    return data.url as string;
+  }
+
+  async function onUploadImages(files: FileList | null) {
+    if (!files?.length) return;
     setUploading(true);
     setError(null);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      setItems((prev) => [...prev, { type, url: data.url }]);
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        uploaded.push(await uploadFile(file));
+      }
+      setImageUrls((prev) => [...prev, ...uploaded]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -40,80 +89,346 @@ export function MediaManager({
     }
   }
 
-  function addInstagram() {
-    const url = instagramUrl.trim();
-    if (!url) return;
-    setItems((prev) => [...prev, { type: "INSTAGRAM", url }]);
-    setInstagramUrl("");
+  async function onUploadVideo(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const url = await uploadFile(file);
+      setVideoUrl(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   }
 
+  function addImagePost() {
+    const linkParts = splitPostUrlField(postUrl);
+    const uploaded = [...new Set(imageUrls.map((u) => u.trim()).filter(Boolean))];
+    if (linkParts.length === 0 && uploaded.length === 0) {
+      setError("Add a post URL and/or upload at least one image.");
+      return;
+    }
+
+    // Multiple direct URLs in the field → one multi-image post
+    if (linkParts.length > 1) {
+      const photos = [...uploaded, ...linkParts];
+      const unique = [...new Set(photos)];
+      setItems((prev) => [
+        ...prev,
+        {
+          type: "IMAGE",
+          url: unique[0],
+          urls: unique,
+          caption: caption.trim(),
+        },
+      ]);
+      resetComposer();
+      return;
+    }
+
+    const link = linkParts[0] || "";
+    const photos = uploaded;
+
+    if (photos.length > 0) {
+      setItems((prev) => [
+        ...prev,
+        {
+          type: "IMAGE",
+          url: photos[0],
+          urls: photos,
+          caption: caption.trim() || (link ? `Post: ${link}` : ""),
+        },
+      ]);
+    } else if (link) {
+      setItems((prev) => [
+        ...prev,
+        {
+          type: isInstagramUrl(link) ? "INSTAGRAM" : "IMAGE",
+          url: link,
+          caption: caption.trim(),
+        },
+      ]);
+    }
+    resetComposer();
+  }
+
+  function addVideoPost() {
+    const url = videoUrl.trim();
+    if (!url) {
+      setError("Upload a video or paste a reel / video URL.");
+      return;
+    }
+    setItems((prev) => [
+      ...prev,
+      {
+        type: isInstagramUrl(url) ? "INSTAGRAM" : "VIDEO",
+        url,
+        caption: caption.trim(),
+      },
+    ]);
+    resetComposer();
+  }
+
+  function move(index: number, dir: -1 | 1) {
+    setItems((prev) => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  function removeAt(index: number) {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function removeImageUrl(url: string) {
+    setImageUrls((prev) => prev.filter((u) => u !== url));
+  }
+
+  const payload = items.map((item) => ({
+    type: item.type,
+    url: item.url,
+    urlsJson: serializeUrlsJson(
+      item.type === "IMAGE" && item.urls?.length
+        ? item.urls
+        : item.urls || []
+    ),
+    caption: item.caption || "",
+  }));
+
   return (
-    <div className="space-y-4">
-      <input type="hidden" name={name} value={JSON.stringify(items)} />
-      <div className="flex flex-wrap gap-3">
-        <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-sand-50 px-3 py-2 text-sm">
-          {uploading ? "Uploading…" : "Upload photo"}
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void onUpload(file, "IMAGE");
-              e.target.value = "";
-            }}
-          />
-        </Label>
-        <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-sand-50 px-3 py-2 text-sm">
-          Upload video
-          <input
-            type="file"
-            accept="video/*"
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void onUpload(file, "VIDEO");
-              e.target.value = "";
-            }}
-          />
-        </Label>
-      </div>
+    <div className="space-y-5">
+      <input type="hidden" name={name} value={JSON.stringify(payload)} />
 
-      <div className="flex flex-wrap gap-2">
-        <Input
-          value={instagramUrl}
-          onChange={(e) => setInstagramUrl(e.target.value)}
-          placeholder="Instagram post/reel URL"
-          className="max-w-md rounded-none"
-        />
-        <Button type="button" variant="outline" className="rounded-none" onClick={addInstagram}>
-          Add Instagram link
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          className="rounded-none"
+          disabled={composer !== null}
+          onClick={() => {
+            setError(null);
+            setComposer("image");
+          }}
+        >
+          Add image post
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-none"
+          disabled={composer !== null}
+          onClick={() => {
+            setError(null);
+            setComposer("video");
+          }}
+        >
+          Add video / reel
+        </Button>
+        <p className="text-sm text-ink-soft/70">
+          Each post can be an Instagram/carousel link, one or more photos, or a video/reel.
+        </p>
       </div>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {composer === "image" ? (
+        <div className="space-y-4 border border-sand-300 bg-sand-50 p-4">
+          <h3 className="font-display text-lg">New image post</h3>
+          <div className="space-y-2">
+            <Label htmlFor="postUrl">Post URL (optional)</Label>
+            <textarea
+              id="postUrl"
+              value={postUrl}
+              onChange={(e) => setPostUrl(e.target.value)}
+              placeholder="Instagram post/carousel URL — or paste several image URLs (one per line)"
+              className="flex min-h-[72px] w-full rounded-none border border-input bg-transparent px-3 py-2 text-sm"
+              rows={3}
+            />
+            <p className="text-xs text-ink-soft/60">
+              One Instagram/carousel link, or multiple direct image URLs separated by new lines.
+            </p>
+          </div>
 
-      <ul className="space-y-2">
-        {items.map((item, index) => (
-          <li
-            key={`${item.url}-${index}`}
-            className="flex items-center justify-between gap-3 border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
-          >
-            <span className="truncate">
-              <span className="text-bronze">{item.type}</span> · {item.url}
-            </span>
-            <button
-              type="button"
-              className="text-red-700 underline"
-              onClick={() => setItems((prev) => prev.filter((_, i) => i !== index))}
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+          <div className="space-y-2">
+            <Label>Upload images (optional — one or more)</Label>
+            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm">
+              {uploading ? "Uploading…" : "Choose photos"}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  void onUploadImages(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </Label>
+            {imageUrls.length > 0 ? (
+              <ul className="space-y-1 text-sm">
+                {imageUrls.map((url) => (
+                  <li key={url} className="flex items-center justify-between gap-2">
+                    <span className="truncate">{url}</span>
+                    <button
+                      type="button"
+                      className="shrink-0 text-red-700 underline"
+                      onClick={() => removeImageUrl(url)}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="imageCaption">Caption (optional)</Label>
+            <Input
+              id="imageCaption"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              className="rounded-none"
+            />
+          </div>
+
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" className="rounded-none" onClick={addImagePost} disabled={uploading}>
+              Add post
+            </Button>
+            <Button type="button" variant="outline" className="rounded-none" onClick={resetComposer}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {composer === "video" ? (
+        <div className="space-y-4 border border-sand-300 bg-sand-50 p-4">
+          <h3 className="font-display text-lg">New video / reel post</h3>
+          <div className="space-y-2">
+            <Label>Upload video file</Label>
+            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm">
+              {uploading ? "Uploading…" : "Choose video"}
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  void onUploadVideo(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </Label>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="videoUrl">Or paste reel / video URL</Label>
+            <Input
+              id="videoUrl"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="Instagram reel URL or direct video URL"
+              className="rounded-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="videoCaption">Caption (optional)</Label>
+            <Input
+              id="videoCaption"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              className="rounded-none"
+            />
+          </div>
+
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" className="rounded-none" onClick={addVideoPost} disabled={uploading}>
+              Add post
+            </Button>
+            <Button type="button" variant="outline" className="rounded-none" onClick={resetComposer}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-ink">
+          Posts in this project ({items.length})
+        </h3>
+        {items.length === 0 ? (
+          <p className="text-sm text-ink-soft/60">No posts yet. Add an image or video post above.</p>
+        ) : (
+          <ul className="space-y-2">
+            {items.map((item, index) => {
+              const photoCount =
+                item.type === "IMAGE" && item.urls?.length
+                  ? item.urls.length
+                  : item.type === "IMAGE"
+                    ? 1
+                    : 0;
+              const kind =
+                item.type === "VIDEO"
+                  ? "Video"
+                  : item.type === "INSTAGRAM"
+                    ? "Instagram / reel"
+                    : photoCount > 1
+                      ? `Image × ${photoCount}`
+                      : "Image";
+              return (
+                <li
+                  key={`${item.type}-${item.url}-${index}`}
+                  className="flex flex-wrap items-center justify-between gap-3 border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="text-bronze">{kind}</span>
+                    <span className="mx-2 text-ink-soft/40">·</span>
+                    <span className="truncate">{item.url}</span>
+                    {item.caption ? (
+                      <span className="mt-0.5 block truncate text-xs text-ink-soft/60">
+                        {item.caption}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      className="underline disabled:opacity-40"
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
+                    >
+                      Up
+                    </button>
+                    <button
+                      type="button"
+                      className="underline disabled:opacity-40"
+                      disabled={index === items.length - 1}
+                      onClick={() => move(index, 1)}
+                    >
+                      Down
+                    </button>
+                    <button
+                      type="button"
+                      className="text-red-700 underline"
+                      onClick={() => removeAt(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

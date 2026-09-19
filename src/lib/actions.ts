@@ -114,7 +114,12 @@ export async function upsertProject(formData: FormData) {
   }
 
   const mediaJson = String(formData.get("mediaJson") || "[]");
-  let media: { type: string; url: string; caption?: string }[] = [];
+  let media: {
+    type: string;
+    url: string;
+    urlsJson?: string;
+    caption?: string;
+  }[] = [];
   try {
     media = JSON.parse(mediaJson);
   } catch {
@@ -123,13 +128,16 @@ export async function upsertProject(formData: FormData) {
   await prisma.media.deleteMany({ where: { projectId } });
   if (media.length) {
     await prisma.media.createMany({
-      data: media.map((m, i) => ({
-        projectId,
-        type: m.type,
-        url: m.url,
-        caption: m.caption || "",
-        sortOrder: i,
-      })),
+      data: media
+        .filter((m) => m.url?.trim())
+        .map((m, i) => ({
+          projectId,
+          type: m.type,
+          url: m.url.trim(),
+          urlsJson: m.urlsJson || "[]",
+          caption: m.caption || "",
+          sortOrder: i,
+        })),
     });
   }
 

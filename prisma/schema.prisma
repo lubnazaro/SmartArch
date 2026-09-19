@@ -108,8 +108,12 @@ model ProjectTranslation {
 model Media {
   id        String   @id @default(cuid())
   projectId String
+  /// IMAGE | VIDEO | INSTAGRAM — each row is one project "post"
   type      String
+  /// Primary URL: image, video file, or Instagram/reel/post link
   url       String
+  /// JSON string array of extra image URLs when one IMAGE post has multiple photos
+  urlsJson  String   @default("[]")
   caption   String   @default("")
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
