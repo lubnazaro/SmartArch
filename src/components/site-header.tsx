@@ -7,6 +7,7 @@ import { useState } from "react";
 import type { Locale } from "@/lib/constants";
 import { LOCALES, LOCALE_LABELS } from "@/lib/constants";
 import type { Dictionary } from "@/lib/i18n";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 function swapLocale(pathname: string, next: Locale) {
@@ -48,7 +49,7 @@ export function SiteHeader({
           <img
             src={logoUrl || "/smart-arch-logo-web.png"}
             alt="Smart Arch"
-            className="h-11 w-auto object-contain sm:h-14"
+            className="h-11 w-auto object-contain sm:h-14 dark:brightness-110 dark:contrast-95"
           />
         </Link>
 
@@ -75,6 +76,7 @@ export function SiteHeader({
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <div className="hidden items-center gap-1 sm:flex">
             {LOCALES.map((l) => (
               <Link

@@ -81,18 +81,22 @@ model SiteSettings {
 }
 
 model Project {
-  id          String               @id @default(cuid())
-  category    String
-  coverUrl    String?
-  year        Int?
-  location    String?
-  published   Boolean              @default(false)
-  featured    Boolean              @default(false)
-  sortOrder   Int                  @default(0)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  translations ProjectTranslation[]
-  media       Media[]
+  id             String               @id @default(cuid())
+  category       String
+  coverUrl       String?
+  /// Optional before image for interactive before/after slider
+  beforeImageUrl String?
+  /// Optional after image for interactive before/after slider
+  afterImageUrl  String?
+  year           Int?
+  location       String?
+  published      Boolean              @default(false)
+  featured       Boolean              @default(false)
+  sortOrder      Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  translations   ProjectTranslation[]
+  media          Media[]
 }
 
 model ProjectTranslation {

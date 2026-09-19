@@ -183,6 +183,28 @@ export function MediaManager({
     });
   }
 
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  function onDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function onDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setItems((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(index, 0, moved);
+      return next;
+    });
+    setDragIndex(index);
+  }
+
+  function onDragEnd() {
+    setDragIndex(null);
+  }
+
   function removeAt(index: number) {
     setItems((prev) => prev.filter((_, i) => i !== index));
   }
@@ -377,6 +399,9 @@ export function MediaManager({
         <h3 className="text-sm font-medium text-ink">
           Posts in this project ({items.length})
         </h3>
+        <p className="text-xs text-ink-soft/60">
+          Drag to reorder, or use Up/Down. Order is saved with the project.
+        </p>
         {items.length === 0 ? (
           <p className="text-sm text-ink-soft/60">No posts yet. Add an image or video post above.</p>
         ) : (
@@ -399,7 +424,13 @@ export function MediaManager({
               return (
                 <li
                   key={`${item.type}-${item.url}-${index}`}
-                  className="flex flex-wrap items-center justify-between gap-3 border border-sand-200 bg-sand-50 px-3 py-2 text-sm"
+                  draggable
+                  onDragStart={() => onDragStart(index)}
+                  onDragOver={(e) => onDragOver(e, index)}
+                  onDragEnd={onDragEnd}
+                  className={`flex cursor-grab flex-wrap items-center justify-between gap-3 border border-sand-200 bg-sand-50 px-3 py-2 text-sm active:cursor-grabbing ${
+                    dragIndex === index ? "opacity-60" : ""
+                  }`}
                 >
                   <div className="min-w-0 flex-1">
                     <span className="text-bronze">{kind}</span>

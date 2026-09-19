@@ -21,16 +21,17 @@ export default async function AboutPage({
   const paragraphs = about.split(/\n\n+/).filter(Boolean);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-3xl px-4 section-space sm:px-6">
       <FadeIn>
-        <h1 className="font-display text-4xl text-ink sm:text-5xl">
-          {dict.about.title}
-        </h1>
+        <h1 className="page-title">{dict.about.title}</h1>
+        <div className="mt-10 h-px w-16 bg-bronze/40" />
       </FadeIn>
-      <div className="mt-10 space-y-6">
+      <div className="mt-14 space-y-8">
         {paragraphs.map((p, i) => (
           <FadeIn key={i} delay={i * 0.06}>
-            <p className="text-lg leading-relaxed text-ink-soft/85">{p}</p>
+            <p className="text-lg leading-relaxed text-ink-soft/85 sm:text-xl">
+              {p}
+            </p>
           </FadeIn>
         ))}
       </div>

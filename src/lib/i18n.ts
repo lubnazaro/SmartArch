@@ -32,6 +32,9 @@ export type Dictionary = {
     viewProject: string;
     back: string;
     gallery: string;
+    beforeAfter: string;
+    before: string;
+    after: string;
   };
   about: {
     title: string;
@@ -95,6 +98,9 @@ const en: Dictionary = {
     viewProject: "View project",
     back: "Back to projects",
     gallery: "Gallery",
+    beforeAfter: "Before & after",
+    before: "Before",
+    after: "After",
   },
   about: {
     title: "About Us",
@@ -158,6 +164,9 @@ const ar: Dictionary = {
     viewProject: "عرض المشروع",
     back: "العودة إلى المشاريع",
     gallery: "المعرض",
+    beforeAfter: "قبل وبعد",
+    before: "قبل",
+    after: "بعد",
   },
   about: {
     title: "من نحن",
@@ -221,6 +230,9 @@ const he: Dictionary = {
     viewProject: "לצפייה בפרויקט",
     back: "חזרה לפרויקטים",
     gallery: "גלריה",
+    beforeAfter: "לפני ואחרי",
+    before: "לפני",
+    after: "אחרי",
   },
   about: {
     title: "עלינו",

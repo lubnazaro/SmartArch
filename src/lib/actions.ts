@@ -83,9 +83,24 @@ export async function upsertProject(formData: FormData) {
       "Instagram links cannot be used as cover images. Use Upload cover photo instead."
     );
   }
+  const rawBefore = String(formData.get("beforeImageUrl") || "").trim();
+  const rawAfter = String(formData.get("afterImageUrl") || "").trim();
+  for (const [label, raw] of [
+    ["before", rawBefore],
+    ["after", rawAfter],
+  ] as const) {
+    if (raw && (/instagram\.com|instagr\.am/i.test(raw))) {
+      throw new Error(
+        `Instagram links cannot be used as ${label} images. Upload a photo instead.`
+      );
+    }
+  }
+
   const data = {
     category,
     coverUrl: rawCover || null,
+    beforeImageUrl: rawBefore || null,
+    afterImageUrl: rawAfter || null,
     year: formData.get("year") ? Number(formData.get("year")) : null,
     location: String(formData.get("location") || "") || null,
     published: formData.get("published") === "on",
@@ -172,6 +187,20 @@ export async function upsertProject(formData: FormData) {
 export async function deleteProject(id: string) {
   await assertAdmin();
   await prisma.project.delete({ where: { id } });
+  revalidateSite();
+}
+
+/** Persist project list order from drag-and-drop (array of ids, first = top). */
+export async function reorderProjects(orderedIds: string[]) {
+  await assertAdmin();
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.project.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    )
+  );
   revalidateSite();
 }
 

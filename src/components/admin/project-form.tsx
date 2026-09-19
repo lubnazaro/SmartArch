@@ -104,6 +104,33 @@ export function ProjectForm({
         <CoverUploader initial={project?.coverUrl || ""} />
       </section>
 
+      <section className="space-y-4 border border-sand-200 bg-sand-50/60 p-4">
+        <h2 className="font-display text-xl">Before / After slider</h2>
+        <p className="text-sm text-ink-soft/70">
+          Optional. Upload both images to show an interactive comparison on the public project page.
+        </p>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <CoverUploader
+            name="beforeImageUrl"
+            initial={project?.beforeImageUrl || ""}
+            label="Before image"
+            helpText="Usually the existing or empty condition."
+            buttonLabel="Upload before photo"
+            clearLabel="Clear before"
+            placeholder="/uploads/before.jpg"
+          />
+          <CoverUploader
+            name="afterImageUrl"
+            initial={project?.afterImageUrl || ""}
+            label="After image"
+            helpText="The completed design."
+            buttonLabel="Upload after photo"
+            clearLabel="Clear after"
+            placeholder="/uploads/after.jpg"
+          />
+        </div>
+      </section>
+
       <section className="space-y-4 border border-sand-200 p-4">
         <h2 className="font-display text-xl">English (required)</h2>
         <div className="space-y-2">
@@ -144,7 +171,7 @@ export function ProjectForm({
         <h2 className="font-display text-xl">Project posts</h2>
         <p className="text-sm text-ink-soft/70">
           Add multiple posts — upload photos/videos to display them on the site, or paste Instagram
-          URLs to embed posts and reels. Reorder with Up/Down.
+          URLs to embed posts and reels. Drag posts to reorder (or use Up/Down).
         </p>
         <MediaManager initial={initialMedia} />
       </section>

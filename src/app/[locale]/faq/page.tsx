@@ -24,14 +24,15 @@ export default async function FaqPage({
     .filter(Boolean) as { id: string; question: string; answer: string }[];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-3xl px-4 section-space sm:px-6">
       <FadeIn>
-        <h1 className="font-display text-4xl text-ink sm:text-5xl">
-          {dict.faq.title}
-        </h1>
-        <p className="mt-4 text-lg text-ink-soft/75">{dict.faq.subtitle}</p>
+        <h1 className="page-title">{dict.faq.title}</h1>
+        <p className="mt-6 text-lg leading-relaxed text-ink-soft/75 sm:text-xl">
+          {dict.faq.subtitle}
+        </p>
+        <div className="mt-10 h-px w-16 bg-bronze/40" />
       </FadeIn>
-      <div className="mt-12">
+      <div className="mt-14">
         {items.length === 0 ? (
           <p className="text-ink-soft/70">{dict.faq.empty}</p>
         ) : (

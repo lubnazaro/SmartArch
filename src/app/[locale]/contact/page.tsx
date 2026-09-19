@@ -54,15 +54,16 @@ export default async function ContactPage({
   ];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-3xl px-4 section-space sm:px-6">
       <FadeIn>
-        <h1 className="font-display text-4xl text-ink sm:text-5xl">
-          {dict.contact.title}
-        </h1>
-        <p className="mt-4 text-lg text-ink-soft/75">{dict.contact.subtitle}</p>
+        <h1 className="page-title">{dict.contact.title}</h1>
+        <p className="mt-6 text-lg leading-relaxed text-ink-soft/75 sm:text-xl">
+          {dict.contact.subtitle}
+        </p>
+        <div className="mt-10 h-px w-16 bg-bronze/40" />
       </FadeIn>
 
-      <div className="mt-12 divide-y divide-sand-200 border-y border-sand-200">
+      <div className="mt-14 divide-y divide-sand-200 border-y section-rule">
         {rows.map((row, i) => {
           const Icon = row.icon;
           const content = (

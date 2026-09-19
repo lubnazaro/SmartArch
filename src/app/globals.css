@@ -100,6 +100,67 @@
   --sidebar-accent-foreground: #1a1714;
   --sidebar-border: #d9cdb8;
   --sidebar-ring: #7a654c;
+  --page-rule: rgba(26, 23, 20, 0.12);
+  --hero-veil-from: rgba(246, 241, 232, 1);
+  --hero-veil-mid: rgba(246, 241, 232, 0.88);
+  --hero-veil-edge: rgba(246, 241, 232, 0.35);
+  --body-grad-a: rgba(122, 101, 76, 0.12);
+  --body-grad-b: rgba(194, 177, 154, 0.25);
+  --body-base-top: #f6f1e8;
+  --body-base-mid: #efe8dc;
+  --body-base-bot: #f6f1e8;
+}
+
+/* Atelier night mode — charcoal with warm beige accents */
+.dark {
+  --sand-50: #1c1a17;
+  --sand-100: #24211c;
+  --sand-200: #353028;
+  --sand-300: #4a4338;
+  --sand-400: #8a7a64;
+  --ink: #f0e8dc;
+  --ink-soft: #d4c9b8;
+  --bronze: #c4a882;
+  --bronze-soft: #a89278;
+  --background: #161411;
+  --foreground: #f0e8dc;
+  --card: #1c1a17;
+  --card-foreground: #f0e8dc;
+  --popover: #1c1a17;
+  --popover-foreground: #f0e8dc;
+  --primary: #f0e8dc;
+  --primary-foreground: #161411;
+  --secondary: #24211c;
+  --secondary-foreground: #f0e8dc;
+  --muted: #24211c;
+  --muted-foreground: #a89a86;
+  --accent: #2e2a24;
+  --accent-foreground: #f0e8dc;
+  --border: #353028;
+  --input: #353028;
+  --ring: #c4a882;
+  --chart-1: #c4a882;
+  --chart-2: #a89278;
+  --chart-3: #8a7a64;
+  --chart-4: #d4c9b8;
+  --chart-5: #f0e8dc;
+  --sidebar: #1c1a17;
+  --sidebar-foreground: #f0e8dc;
+  --sidebar-primary: #f0e8dc;
+  --sidebar-primary-foreground: #161411;
+  --sidebar-accent: #2e2a24;
+  --sidebar-accent-foreground: #f0e8dc;
+  --sidebar-border: #353028;
+  --sidebar-ring: #c4a882;
+  --page-rule: rgba(240, 232, 220, 0.1);
+  --hero-veil-from: rgba(22, 20, 17, 0.95);
+  --hero-veil-mid: rgba(22, 20, 17, 0.78);
+  --hero-veil-edge: rgba(22, 20, 17, 0.28);
+  --body-grad-a: rgba(196, 168, 130, 0.08);
+  --body-grad-b: rgba(74, 67, 56, 0.35);
+  --body-base-top: #161411;
+  --body-base-mid: #1a1714;
+  --body-base-bot: #161411;
 }
 
 @layer base {
@@ -112,9 +173,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
-      radial-gradient(ellipse 90% 50% at 10% -10%, rgba(122, 101, 76, 0.12), transparent 55%),
-      radial-gradient(ellipse 70% 40% at 90% 0%, rgba(194, 177, 154, 0.25), transparent 50%),
-      linear-gradient(180deg, #f6f1e8 0%, #efe8dc 48%, #f6f1e8 100%);
+      radial-gradient(ellipse 90% 50% at 10% -10%, var(--body-grad-a), transparent 55%),
+      radial-gradient(ellipse 70% 40% at 90% 0%, var(--body-grad-b), transparent 50%),
+      linear-gradient(180deg, var(--body-base-top) 0%, var(--body-base-mid) 48%, var(--body-base-bot) 100%);
     background-attachment: fixed;
   }
 }
@@ -142,5 +203,26 @@
       linear-gradient(rgba(26, 23, 20, 0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(26, 23, 20, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
+  }
+  .dark .arch-grid {
+    background-image:
+      linear-gradient(rgba(240, 232, 220, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240, 232, 220, 0.05) 1px, transparent 1px);
+  }
+  .section-rule {
+    border-color: var(--page-rule);
+  }
+  .page-title {
+    @apply font-display tracking-tight text-ink;
+    font-size: clamp(2.75rem, 5vw, 4.25rem);
+    line-height: 1.05;
+  }
+  .project-title {
+    @apply font-display tracking-tight text-ink;
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1.02;
+  }
+  .section-space {
+    @apply py-24 sm:py-32;
   }
 }
