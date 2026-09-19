@@ -23,6 +23,10 @@ npm run dev
 
 Open [http://127.0.0.1:3847](http://127.0.0.1:3847).
 
+## Go live (smartarch.net)
+
+See **[GO_LIVE.md](./GO_LIVE.md)** — deploy with Docker/Fly.io, then point Cloudflare DNS at the host.
+
 ## Admin login
 
 1. Open [http://127.0.0.1:3847/admin/login](http://127.0.0.1:3847/admin/login)
