@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import {
   getMediaImageUrls,
   isInstagramUrl,
+  isUsableCoverUrl,
+  coverUrlErrorMessage,
   parseUrlsJson,
   serializeUrlsJson,
   splitPostUrlField,
@@ -228,32 +230,40 @@ export function MediaManager({
         >
           Add video / reel
         </Button>
-        <p className="text-sm text-ink-soft/70">
-          Each post can be an Instagram/carousel link, one or more photos, or a video/reel.
-        </p>
       </div>
+      <ul className="list-disc space-y-1 pl-5 text-sm text-ink-soft/75">
+        <li>
+          <strong className="font-medium text-ink">Upload photos/videos</strong> to show them
+          directly on the site.
+        </li>
+        <li>
+          <strong className="font-medium text-ink">Paste an Instagram post or reel URL</strong> to
+          embed the official Instagram player on the project page.
+        </li>
+        <li>Instagram page links are not cover images — use Upload cover photo above for covers.</li>
+      </ul>
 
       {composer === "image" ? (
         <div className="space-y-4 border border-sand-300 bg-sand-50 p-4">
           <h3 className="font-display text-lg">New image post</h3>
           <div className="space-y-2">
-            <Label htmlFor="postUrl">Post URL (optional)</Label>
+            <Label htmlFor="postUrl">Instagram post URL (optional — embeds on site)</Label>
             <textarea
               id="postUrl"
               value={postUrl}
               onChange={(e) => setPostUrl(e.target.value)}
-              placeholder="Instagram post/carousel URL — or paste several image URLs (one per line)"
+              placeholder="https://www.instagram.com/p/…  — or paste direct image URLs (one per line)"
               className="flex min-h-[72px] w-full rounded-none border border-input bg-transparent px-3 py-2 text-sm"
               rows={3}
             />
             <p className="text-xs text-ink-soft/60">
-              One Instagram/carousel link, or multiple direct image URLs separated by new lines.
+              Instagram links embed the post. For photos that always display on-site, upload files below.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Upload images (optional — one or more)</Label>
-            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm">
+            <Label>Upload photos (recommended for on-site gallery)</Label>
+            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm font-medium">
               {uploading ? "Uploading…" : "Choose photos"}
               <input
                 type="file"
@@ -312,8 +322,8 @@ export function MediaManager({
         <div className="space-y-4 border border-sand-300 bg-sand-50 p-4">
           <h3 className="font-display text-lg">New video / reel post</h3>
           <div className="space-y-2">
-            <Label>Upload video file</Label>
-            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm">
+            <Label>Upload video file (plays on site)</Label>
+            <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-white px-3 py-2 text-sm font-medium">
               {uploading ? "Uploading…" : "Choose video"}
               <input
                 type="file"
@@ -328,14 +338,17 @@ export function MediaManager({
             </Label>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="videoUrl">Or paste reel / video URL</Label>
+            <Label htmlFor="videoUrl">Or Instagram reel / YouTube / Vimeo / video URL</Label>
             <Input
               id="videoUrl"
               value={videoUrl}
               onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="Instagram reel URL or direct video URL"
+              placeholder="https://www.instagram.com/reel/… or uploaded /uploads/…"
               className="rounded-none"
             />
+            <p className="text-xs text-ink-soft/60">
+              Instagram reel URLs embed on the page. Uploaded files play with native video controls.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="videoCaption">Caption (optional)</Label>
@@ -481,6 +494,100 @@ export function LogoUploader({
         placeholder="/uploads/logo.png or leave empty for default wordmark"
         className="rounded-none"
       />
+    </div>
+  );
+}
+
+export function CoverUploader({
+  name = "coverUrl",
+  initial = "",
+}: {
+  name?: string;
+  initial?: string;
+}) {
+  const [url, setUrl] = useState(initial);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(() => coverUrlErrorMessage(initial));
+
+  function onUrlChange(next: string) {
+    const msg = coverUrlErrorMessage(next);
+    setError(msg);
+    setUrl(next);
+  }
+
+  const submitValue = error ? "" : url;
+
+  return (
+    <div className="space-y-3">
+      <input type="hidden" name={name} value={submitValue} />
+      <div className="space-y-1">
+        <Label>Cover photo</Label>
+        <p className="text-xs text-ink-soft/65">
+          Upload an image file for the project cover. Instagram post links will not display as covers —
+          use them in Project posts below to embed the reel/post on the page.
+        </p>
+      </div>
+      {submitValue && isUsableCoverUrl(submitValue) ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={submitValue}
+          alt="Cover preview"
+          className="max-h-40 w-full max-w-md object-cover bg-sand-100"
+        />
+      ) : null}
+      <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-sand-50 px-4 py-2.5 text-sm font-medium">
+        {uploading ? "Uploading…" : "Upload cover photo"}
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={uploading}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setUploading(true);
+            setError(null);
+            try {
+              const body = new FormData();
+              body.append("file", file);
+              const res = await fetch("/api/upload", { method: "POST", body });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Upload failed");
+              setUrl(data.url);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Upload failed");
+            } finally {
+              setUploading(false);
+              e.target.value = "";
+            }
+          }}
+        />
+      </Label>
+      <div className="space-y-1">
+        <Label htmlFor={name} className="text-xs text-ink-soft/70">
+          Or paste a direct image URL (not an Instagram page)
+        </Label>
+        <Input
+          id={name}
+          value={url}
+          onChange={(e) => onUrlChange(e.target.value)}
+          placeholder="/uploads/cover.jpg"
+          className="rounded-none"
+        />
+      </div>
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {url ? (
+        <button
+          type="button"
+          className="text-sm text-red-700 underline"
+          onClick={() => {
+            setUrl("");
+            setError(null);
+          }}
+        >
+          Clear cover
+        </button>
+      ) : null}
     </div>
   );
 }

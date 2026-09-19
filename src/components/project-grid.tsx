@@ -1,12 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Locale } from "@/lib/constants";
 import type { Dictionary } from "@/lib/i18n";
 import {
   pickProjectTranslation,
   type ProjectWithRelations,
 } from "@/lib/content";
+import { isUsableCoverUrl } from "@/lib/media";
 import { FadeIn } from "@/components/motion";
+import { ProjectCoverImage } from "@/components/project-cover";
 
 export function ProjectGrid({
   projects,
@@ -33,11 +34,10 @@ export function ProjectGrid({
           <FadeIn key={project.id} delay={i * 0.08}>
             <Link href={href} className="group block">
               <div className="relative aspect-[4/3] overflow-hidden bg-sand-200">
-                {project.coverUrl ? (
-                  <Image
+                {isUsableCoverUrl(project.coverUrl) && project.coverUrl ? (
+                  <ProjectCoverImage
                     src={project.coverUrl}
                     alt={t.title}
-                    fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />

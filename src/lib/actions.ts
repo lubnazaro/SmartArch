@@ -59,9 +59,15 @@ export async function upsertProject(formData: FormData) {
 
   const slugEn =
     String(formData.get("slugEn") || "").trim() || slugify(titleEn);
+  const rawCover = String(formData.get("coverUrl") || "").trim();
+  if (rawCover && (/instagram\.com|instagr\.am/i.test(rawCover))) {
+    throw new Error(
+      "Instagram links cannot be used as cover images. Use Upload cover photo instead."
+    );
+  }
   const data = {
     category,
-    coverUrl: String(formData.get("coverUrl") || "") || null,
+    coverUrl: rawCover || null,
     year: formData.get("year") ? Number(formData.get("year")) : null,
     location: String(formData.get("location") || "") || null,
     published: formData.get("published") === "on",

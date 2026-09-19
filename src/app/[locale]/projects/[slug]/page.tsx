@@ -1,20 +1,16 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { InstagramIcon } from "@/components/icons";
 import { isLocale, CATEGORIES, type Locale } from "@/lib/constants";
 import { getDictionary } from "@/lib/i18n";
 import {
   getProjectBySlug,
   pickProjectTranslation,
 } from "@/lib/content";
-import { getMediaImageUrls, isInstagramUrl } from "@/lib/media";
+import { isUsableCoverUrl } from "@/lib/media";
 import { FadeIn } from "@/components/motion";
-
-function isLocalMediaUrl(url: string) {
-  return url.startsWith("/") || url.startsWith("data:");
-}
+import { ProjectMediaPost } from "@/components/project-media";
+import { ProjectCoverImage } from "@/components/project-cover";
 
 export default async function ProjectDetailPage({
   params,
@@ -36,19 +32,13 @@ export default async function ProjectDetailPage({
       : `/${locale}/interior-design`;
 
   const posts = project.media;
+  const coverOk = isUsableCoverUrl(project.coverUrl);
 
   return (
     <div className="pb-20">
       <div className="relative aspect-[16/10] max-h-[70vh] w-full overflow-hidden bg-sand-200">
-        {project.coverUrl ? (
-          <Image
-            src={project.coverUrl}
-            alt={t.title}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+        {coverOk && project.coverUrl ? (
+          <ProjectCoverImage src={project.coverUrl} alt={t.title} priority />
         ) : (
           <div className="arch-grid h-full" />
         )}
@@ -88,90 +78,11 @@ export default async function ProjectDetailPage({
             <h2 className="font-display text-2xl text-ink">
               {dict.projects.gallery}
             </h2>
-            {posts.map((post, i) => {
-              if (post.type === "VIDEO") {
-                const isFile = isLocalMediaUrl(post.url);
-                return (
-                  <FadeIn key={post.id} delay={i * 0.04}>
-                    <article className="space-y-3">
-                      {isFile ? (
-                        <video
-                          src={post.url}
-                          controls
-                          className="w-full bg-ink"
-                          preload="metadata"
-                        />
-                      ) : (
-                        <a
-                          href={post.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex text-bronze hover:underline"
-                        >
-                          {post.caption || post.url}
-                        </a>
-                      )}
-                      {post.caption && isFile ? (
-                        <p className="text-sm text-ink-soft/70">{post.caption}</p>
-                      ) : null}
-                    </article>
-                  </FadeIn>
-                );
-              }
-
-              if (post.type === "INSTAGRAM" || isInstagramUrl(post.url)) {
-                return (
-                  <FadeIn key={post.id} delay={i * 0.04}>
-                    <a
-                      href={post.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 text-bronze hover:underline"
-                    >
-                      <InstagramIcon className="h-4 w-4" />
-                      {post.caption || post.url}
-                    </a>
-                  </FadeIn>
-                );
-              }
-
-              // IMAGE post — one or many photos
-              const urls = getMediaImageUrls(post);
-              return (
-                <FadeIn key={post.id} delay={i * 0.04}>
-                  <article className="space-y-3">
-                    <div className={urls.length > 1 ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"}>
-                      {urls.map((src) => (
-                        <div
-                          key={src}
-                          className="relative aspect-[4/3] overflow-hidden bg-sand-200"
-                        >
-                          {isLocalMediaUrl(src) ? (
-                            <Image
-                              src={src}
-                              alt={post.caption || t.title}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 768px"
-                            />
-                          ) : (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={src}
-                              alt={post.caption || t.title}
-                              className="h-full w-full object-cover"
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    {post.caption ? (
-                      <p className="text-sm text-ink-soft/70">{post.caption}</p>
-                    ) : null}
-                  </article>
-                </FadeIn>
-              );
-            })}
+            {posts.map((post, i) => (
+              <FadeIn key={post.id} delay={i * 0.04}>
+                <ProjectMediaPost post={post} altFallback={t.title} />
+              </FadeIn>
+            ))}
           </div>
         ) : null}
       </div>

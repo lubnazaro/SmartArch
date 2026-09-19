@@ -1,7 +1,11 @@
 "use client";
 
 import type { Media, Project, ProjectTranslation } from "@prisma/client";
-import { MediaManager, mediaToDraft } from "@/components/admin/media-manager";
+import {
+  CoverUploader,
+  MediaManager,
+  mediaToDraft,
+} from "@/components/admin/media-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,16 +51,6 @@ export function ProjectForm({
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="coverUrl">Cover image URL</Label>
-          <Input
-            id="coverUrl"
-            name="coverUrl"
-            defaultValue={project?.coverUrl || ""}
-            placeholder="Upload below then paste URL, or use /uploads/..."
-            className="rounded-none"
-          />
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
           <Input
             id="location"
@@ -85,7 +79,7 @@ export function ProjectForm({
             className="rounded-none"
           />
         </div>
-        <div className="flex items-end gap-6 pb-2">
+        <div className="flex items-end gap-6 pb-2 sm:col-span-2">
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -103,6 +97,11 @@ export function ProjectForm({
             Featured on home
           </label>
         </div>
+      </section>
+
+      <section className="space-y-4 border border-sand-200 bg-sand-50/60 p-4">
+        <h2 className="font-display text-xl">Cover image</h2>
+        <CoverUploader initial={project?.coverUrl || ""} />
       </section>
 
       <section className="space-y-4 border border-sand-200 p-4">
@@ -144,9 +143,8 @@ export function ProjectForm({
       <section className="space-y-4 border border-sand-200 p-4">
         <h2 className="font-display text-xl">Project posts</h2>
         <p className="text-sm text-ink-soft/70">
-          Add multiple posts to this project — image posts (Instagram/carousel URL or one or more photos)
-          and video/reel posts. Reorder with Up/Down. For the cover, paste an uploaded image URL into
-          Cover image URL above.
+          Add multiple posts — upload photos/videos to display them on the site, or paste Instagram
+          URLs to embed posts and reels. Reorder with Up/Down.
         </p>
         <MediaManager initial={initialMedia} />
       </section>

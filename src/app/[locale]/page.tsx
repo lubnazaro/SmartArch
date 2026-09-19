@@ -11,7 +11,9 @@ import {
   getHeroForLocale,
   pickProjectTranslation,
 } from "@/lib/content";
+import { isUsableCoverUrl } from "@/lib/media";
 import { FadeIn, RevealText } from "@/components/motion";
+import { ProjectCoverImage } from "@/components/project-cover";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -107,11 +109,10 @@ export default async function HomePage({
                     className="group block"
                   >
                     <div className="relative aspect-[3/4] overflow-hidden bg-sand-200">
-                      {project.coverUrl ? (
-                        <Image
+                      {isUsableCoverUrl(project.coverUrl) && project.coverUrl ? (
+                        <ProjectCoverImage
                           src={project.coverUrl}
                           alt={t.title}
-                          fill
                           className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                           sizes="(max-width: 768px) 100vw, 33vw"
                         />
