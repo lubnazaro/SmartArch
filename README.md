@@ -42,7 +42,15 @@ DATABASE_URL="file:./dev.db"
 
 ## Logo
 
-Upload the Smart Arch logo in **Admin → Site content**. Export your PDF logo to PNG or SVG first, then upload. Until then, a wordmark is used.
+The Smart Arch PNG logo is included and shown in the site header. You can replace it anytime in **Admin → Site content**.
+
+## Domain (Cloudflare)
+
+You already own **smartarch.net**. When ready to go live:
+
+1. Deploy the app (e.g. Cloudflare Pages, Vercel, or a VPS)
+2. In Cloudflare DNS for `smartarch.net`, point `www` (and apex `@`) to that host
+3. Set production `AUTH_URL=https://www.smartarch.net`
 
 ## Contact (seeded)
 
