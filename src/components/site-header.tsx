@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -45,14 +44,19 @@ export function SiteHeader({
     <header className="fixed inset-x-0 top-0 z-50 border-b border-sand-200/60 bg-sand-50/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6">
         <Link href={base} className="relative z-10 flex items-center gap-3">
-          <Image
-            src={logoUrl || "/smart-arch-logo.svg"}
-            alt="Smart Arch"
-            width={160}
-            height={36}
-            className="h-8 w-auto sm:h-9"
-            priority
-          />
+          {logoUrl ? (
+            // Custom uploaded logo
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt="Smart Arch"
+              className="h-8 w-auto sm:h-9"
+            />
+          ) : (
+            <span className="font-display text-2xl tracking-tight text-ink sm:text-[1.7rem]">
+              Smart Arch
+            </span>
+          )}
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

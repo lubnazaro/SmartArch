@@ -25,6 +25,14 @@ export function SiteFooter({
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-soft/75">
             {dict.footer.designTech}
           </p>
+          <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            <Link href={`${base}/about`} className="text-ink-soft hover:text-ink">
+              {dict.nav.about}
+            </Link>
+            <Link href={`${base}/faq`} className="text-ink-soft hover:text-ink">
+              {dict.nav.faq}
+            </Link>
+          </div>
         </div>
         <div className="space-y-3 text-sm">
           <p className="text-xs uppercase tracking-[0.18em] text-bronze">
@@ -36,14 +44,14 @@ export function SiteFooter({
           <Link href={`${base}/interior-design`} className="block text-ink-soft hover:text-ink">
             {dict.nav.interior}
           </Link>
-          <Link href={`${base}/about`} className="block text-ink-soft hover:text-ink">
-            {dict.nav.about}
-          </Link>
         </div>
         <div className="space-y-3 text-sm">
           <p className="text-xs uppercase tracking-[0.18em] text-bronze">
             {dict.nav.contact}
           </p>
+          <Link href={`${base}/contact`} className="block text-ink-soft hover:text-ink">
+            {dict.nav.contact}
+          </Link>
           <a href={`mailto:${settings.email}`} className="block text-ink-soft hover:text-ink">
             {settings.email}
           </a>
