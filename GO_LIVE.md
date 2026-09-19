@@ -1,5 +1,7 @@
 # Go live — smartarch.net (Cloudflare)
 
+**GitHub repo:** https://github.com/lubnazaro/SmartArch
+
 The site needs a **persistent server** (database + photo/video uploads).  
 Plain Cloudflare Pages alone is not enough for this admin CMS.
 
@@ -7,10 +9,14 @@ Recommended path: **Fly.io** (or Railway) for the app + **Cloudflare DNS** for t
 
 ---
 
-## 1) Create a real GitHub repo (required)
+## 1) Push code to GitHub (if the repo is still empty)
 
-In Cursor, click **Create repo** so this project lives on GitHub.  
-Hosting platforms deploy from GitHub.
+```bash
+git remote add github https://github.com/lubnazaro/SmartArch.git
+git push -u github main
+```
+
+Or grant the agent a GitHub Personal Access Token (repo write) so it can push for you.
 
 ---
 
