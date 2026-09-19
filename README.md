@@ -1,13 +1,13 @@
 # Smart Arch
 
-Architecture and interior design studio site for **[smartarch.net](https://www.smartarch.net)** — Smart Home + Interior Design, with a Google-secured admin panel for projects, media, About, Contact, and FAQ.
+Architecture and interior design studio site for **[smartarch.net](https://www.smartarch.net)** — Smart Home + Interior Design, with a local email/password admin panel for projects, media, About, Contact, and FAQ.
 
 ## Features
 
 - Public site in **English** (default), **Arabic**, and **Hebrew** (RTL-ready)
 - Sections: **Smart Home**, **Interior Design**, About, Contact, FAQ
 - Project galleries with **photo/video uploads** and **Instagram links**
-- Admin CMS at `/admin` — Google sign-in for `zarofiras@gmail.com` and `lubnazaro@gmail.com` only
+- Admin CMS at `/admin` — local login for `zarofiras@gmail.com` and `lubnazaro@gmail.com`
 - SQLite database (Prisma) for all content
 - Beige, content-first visual design with motion
 
@@ -23,21 +23,22 @@ npm run dev
 
 Open [http://127.0.0.1:3847](http://127.0.0.1:3847).
 
-## Google admin login
+## Admin login
 
-1. Create OAuth 2.0 credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Authorized redirect URI: `http://127.0.0.1:3847/api/auth/callback/google` (and your production URL)
-3. Put values in `.env`:
+1. Open [http://127.0.0.1:3847/admin/login](http://127.0.0.1:3847/admin/login)
+2. Sign in with either admin email:
+   - `zarofiras@gmail.com`
+   - `lubnazaro@gmail.com`
+3. Default password (first login only): `BlueBirdf88!`
+4. You will be asked to **change the password** before accessing the admin tools
+
+`.env` needs:
 
 ```env
 AUTH_SECRET="generate-with-openssl-rand-base64-32"
-GOOGLE_CLIENT_ID="..."
-GOOGLE_CLIENT_SECRET="..."
 AUTH_URL="http://127.0.0.1:3847"
 DATABASE_URL="file:./dev.db"
 ```
-
-4. Visit `/admin/login` and sign in with Firas or Lubna’s Google account
 
 ## Logo
 
@@ -52,4 +53,4 @@ Upload the Smart Arch logo in **Admin → Site content**. Export your PDF logo t
 
 ## Stack
 
-Next.js · TypeScript · Tailwind · Prisma (SQLite) · Auth.js (Google) · Framer Motion
+Next.js · TypeScript · Tailwind · Prisma (SQLite) · Auth.js (credentials) · Framer Motion

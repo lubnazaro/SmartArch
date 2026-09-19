@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+const DEFAULT_PASSWORD = "BlueBirdf88!";
 
 const ABOUT_EN = `Smart Arch is an architecture and interior design studio that brings together thoughtful design and smart technology to create spaces that look beautiful and work beautifully.
 
@@ -11,6 +14,11 @@ Our approach is simple: every project should reflect the people who live in it. 
 With our integrated Smart Home solutions, everyday features such as lighting, climate control, curtains, security, and more can become part of one seamless system designed around each client's lifestyle.
 
 At Smart Arch, we don't just design spaces. We create complete living experiences where design meets technology.`;
+
+const ADMINS = [
+  { email: "zarofiras@gmail.com", name: "Firas" },
+  { email: "lubnazaro@gmail.com", name: "Lubna" },
+] as const;
 
 async function main() {
   await prisma.siteSettings.upsert({
@@ -42,7 +50,29 @@ async function main() {
     },
   });
 
-  console.log("Seeded Smart Arch site settings.");
+  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
+
+  for (const admin of ADMINS) {
+    await prisma.user.upsert({
+      where: { email: admin.email },
+      update: {
+        name: admin.name,
+        passwordHash,
+        mustChangePassword: true,
+      },
+      create: {
+        email: admin.email,
+        name: admin.name,
+        passwordHash,
+        mustChangePassword: true,
+      },
+    });
+  }
+
+  console.log("Seeded site settings and admin users:");
+  for (const admin of ADMINS) {
+    console.log(`  - ${admin.name} <${admin.email}> (must change password)`);
+  }
 }
 
 main()
