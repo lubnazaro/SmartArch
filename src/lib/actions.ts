@@ -36,6 +36,24 @@ export async function saveSiteSettings(formData: FormData) {
       instagramHandle: String(formData.get("instagramHandle") || ""),
       address: String(formData.get("address") || ""),
       logoUrl: String(formData.get("logoUrl") || "") || null,
+      heroImageUrl: (() => {
+        const raw = String(formData.get("heroImageUrl") || "").trim();
+        if (raw && (/instagram\.com|instagr\.am/i.test(raw))) {
+          throw new Error(
+            "Instagram links cannot be used as homepage images. Upload a photo instead."
+          );
+        }
+        return raw || null;
+      })(),
+      aboutImageUrl: (() => {
+        const raw = String(formData.get("aboutImageUrl") || "").trim();
+        if (raw && (/instagram\.com|instagr\.am/i.test(raw))) {
+          throw new Error(
+            "Instagram links cannot be used as homepage images. Upload a photo instead."
+          );
+        }
+        return raw || null;
+      })(),
       aboutEn: String(formData.get("aboutEn") || ""),
       aboutAr: String(formData.get("aboutAr") || ""),
       aboutHe: String(formData.get("aboutHe") || ""),

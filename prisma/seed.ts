@@ -42,13 +42,17 @@ async function main() {
       address: "Bethlehem / Jerusalem",
       aboutEn: ABOUT_EN,
       logoUrl: "/smart-arch-logo-web.png",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=80",
+      aboutImageUrl:
+        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=80",
       heroHeadlineEn: "Design meets technology",
       heroSubEn:
         "Architecture and interior design with seamless smart home systems for spaces that look beautiful and work beautifully.",
     },
   });
 
-  // Fill empty about/logo defaults without clobbering edits
+  // Fill empty about/logo/homepage-image defaults without clobbering edits
   const settings = await prisma.siteSettings.findUnique({ where: { id: "main" } });
   if (settings) {
     await prisma.siteSettings.update({
@@ -56,6 +60,12 @@ async function main() {
       data: {
         aboutEn: settings.aboutEn || ABOUT_EN,
         logoUrl: settings.logoUrl || "/smart-arch-logo-web.png",
+        heroImageUrl:
+          settings.heroImageUrl ||
+          "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=80",
+        aboutImageUrl:
+          settings.aboutImageUrl ||
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=80",
         heroHeadlineEn: settings.heroHeadlineEn || "Design meets technology",
         heroSubEn:
           settings.heroSubEn ||

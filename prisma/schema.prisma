@@ -64,6 +64,10 @@ model SiteSettings {
   instagramHandle String   @default("@smartarch.group")
   address         String   @default("Bethlehem / Jerusalem")
   logoUrl         String?
+  /// Homepage hero/cover background image
+  heroImageUrl    String?
+  /// Homepage about / “Our story” section image
+  aboutImageUrl   String?
   aboutEn         String   @default("")
   aboutAr         String   @default("")
   aboutHe         String   @default("")

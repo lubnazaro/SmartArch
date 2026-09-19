@@ -501,9 +501,19 @@ export function LogoUploader({
 export function CoverUploader({
   name = "coverUrl",
   initial = "",
+  label = "Cover photo",
+  helpText = "Upload an image file for the project cover. Instagram post links will not display as covers — use them in Project posts below to embed the reel/post on the page.",
+  buttonLabel = "Upload cover photo",
+  clearLabel = "Clear cover",
+  placeholder = "/uploads/cover.jpg",
 }: {
   name?: string;
   initial?: string;
+  label?: string;
+  helpText?: string;
+  buttonLabel?: string;
+  clearLabel?: string;
+  placeholder?: string;
 }) {
   const [url, setUrl] = useState(initial);
   const [uploading, setUploading] = useState(false);
@@ -521,22 +531,19 @@ export function CoverUploader({
     <div className="space-y-3">
       <input type="hidden" name={name} value={submitValue} />
       <div className="space-y-1">
-        <Label>Cover photo</Label>
-        <p className="text-xs text-ink-soft/65">
-          Upload an image file for the project cover. Instagram post links will not display as covers —
-          use them in Project posts below to embed the reel/post on the page.
-        </p>
+        <Label>{label}</Label>
+        <p className="text-xs text-ink-soft/65">{helpText}</p>
       </div>
       {submitValue && isUsableCoverUrl(submitValue) ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={submitValue}
-          alt="Cover preview"
+          alt={`${label} preview`}
           className="max-h-40 w-full max-w-md object-cover bg-sand-100"
         />
       ) : null}
       <Label className="inline-flex cursor-pointer items-center gap-2 border border-sand-300 bg-sand-50 px-4 py-2.5 text-sm font-medium">
-        {uploading ? "Uploading…" : "Upload cover photo"}
+        {uploading ? "Uploading…" : buttonLabel}
         <input
           type="file"
           accept="image/*"
@@ -571,7 +578,7 @@ export function CoverUploader({
           id={name}
           value={url}
           onChange={(e) => onUrlChange(e.target.value)}
-          placeholder="/uploads/cover.jpg"
+          placeholder={placeholder}
           className="rounded-none"
         />
       </div>
@@ -585,7 +592,7 @@ export function CoverUploader({
             setError(null);
           }}
         >
-          Clear cover
+          {clearLabel}
         </button>
       ) : null}
     </div>

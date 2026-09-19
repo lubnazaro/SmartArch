@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { isLocale, type Locale } from "@/lib/constants";
@@ -7,8 +6,10 @@ import { getDictionary } from "@/lib/i18n";
 import {
   ensureSiteSettings,
   getAboutForLocale,
+  getAboutImageUrl,
   getFeaturedProjects,
   getHeroForLocale,
+  getHeroImageUrl,
   pickProjectTranslation,
 } from "@/lib/content";
 import { isUsableCoverUrl } from "@/lib/media";
@@ -32,15 +33,16 @@ export default async function HomePage({
   const featured = await getFeaturedProjects();
   const aboutPreview = about.split("\n\n")[0] ?? about;
   const base = `/${locale}`;
+  const heroImageUrl = getHeroImageUrl(settings);
+  const aboutImageUrl = getAboutImageUrl(settings);
 
   return (
     <div>
       <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden sm:min-h-[calc(100vh-5rem)]">
         <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=80"
+          <ProjectCoverImage
+            src={heroImageUrl}
             alt=""
-            fill
             priority
             className="object-cover"
             sizes="100vw"
@@ -160,10 +162,9 @@ export default async function HomePage({
           </FadeIn>
           <FadeIn delay={0.12}>
             <div className="relative aspect-[4/5] overflow-hidden bg-sand-200">
-              <Image
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=80"
+              <ProjectCoverImage
+                src={aboutImageUrl}
                 alt=""
-                fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />

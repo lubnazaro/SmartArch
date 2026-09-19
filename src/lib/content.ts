@@ -21,12 +21,27 @@ With our integrated Smart Home solutions, everyday features such as lighting, cl
 
 At Smart Arch, we don't just design spaces. We create complete living experiences where design meets technology.`;
 
+/** Default homepage hero background (matches previous hardcoded Unsplash). */
+export const DEFAULT_HERO_IMAGE_URL =
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=80";
+
+/** Default homepage about-section image (matches previous hardcoded Unsplash). */
+export const DEFAULT_ABOUT_IMAGE_URL =
+  "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=80";
+
 export async function ensureSiteSettings(): Promise<SiteSettings> {
   const existing = await prisma.siteSettings.findUnique({ where: { id: "main" } });
   if (existing) {
-    const data: { aboutEn?: string; logoUrl?: string } = {};
+    const data: {
+      aboutEn?: string;
+      logoUrl?: string;
+      heroImageUrl?: string;
+      aboutImageUrl?: string;
+    } = {};
     if (!existing.aboutEn) data.aboutEn = DEFAULT_ABOUT_EN;
     if (!existing.logoUrl) data.logoUrl = "/smart-arch-logo-web.png";
+    if (!existing.heroImageUrl) data.heroImageUrl = DEFAULT_HERO_IMAGE_URL;
+    if (!existing.aboutImageUrl) data.aboutImageUrl = DEFAULT_ABOUT_IMAGE_URL;
     if (Object.keys(data).length) {
       return prisma.siteSettings.update({ where: { id: "main" }, data });
     }
@@ -37,8 +52,18 @@ export async function ensureSiteSettings(): Promise<SiteSettings> {
       id: "main",
       aboutEn: DEFAULT_ABOUT_EN,
       logoUrl: "/smart-arch-logo-web.png",
+      heroImageUrl: DEFAULT_HERO_IMAGE_URL,
+      aboutImageUrl: DEFAULT_ABOUT_IMAGE_URL,
     },
   });
+}
+
+export function getHeroImageUrl(settings: SiteSettings): string {
+  return settings.heroImageUrl || DEFAULT_HERO_IMAGE_URL;
+}
+
+export function getAboutImageUrl(settings: SiteSettings): string {
+  return settings.aboutImageUrl || DEFAULT_ABOUT_IMAGE_URL;
 }
 
 export function pickProjectTranslation(

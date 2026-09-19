@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { ensureSiteSettings } from "@/lib/content";
 import { saveSiteSettings } from "@/lib/actions";
-import { LogoUploader } from "@/components/admin/media-manager";
+import { CoverUploader, LogoUploader } from "@/components/admin/media-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ export default async function AdminContentPage() {
     <div>
       <h1 className="font-display text-3xl">Site content</h1>
       <p className="mt-2 text-ink-soft/75">
-        About, hero text, contact details, and logo.
+        About, hero text, homepage photos, contact details, and logo.
       </p>
 
       <form action={saveSiteSettings} className="mt-8 space-y-8">
@@ -25,6 +25,34 @@ export default async function AdminContentPage() {
             Upload your Smart Arch logo (PNG/SVG preferred). Your PDF can be exported to PNG first.
           </p>
           <LogoUploader initial={settings.logoUrl || ""} />
+        </section>
+
+        <section className="space-y-6 border border-sand-200 p-4">
+          <div>
+            <h2 className="font-display text-xl">Homepage photos</h2>
+            <p className="mt-1 text-sm text-ink-soft/70">
+              Change the main cover background and the photo next to Our story. Upload a real image
+              file (not an Instagram page link). Clear to restore the default Unsplash photos.
+            </p>
+          </div>
+          <CoverUploader
+            name="heroImageUrl"
+            initial={settings.heroImageUrl || ""}
+            label="Hero / cover background"
+            helpText="Full-bleed background behind the Smart Arch headline on the homepage."
+            buttonLabel="Upload hero photo"
+            clearLabel="Clear hero photo (use default)"
+            placeholder="/uploads/hero.jpg"
+          />
+          <CoverUploader
+            name="aboutImageUrl"
+            initial={settings.aboutImageUrl || ""}
+            label="Our story / About photo"
+            helpText="Image shown beside the About preview on the homepage."
+            buttonLabel="Upload about photo"
+            clearLabel="Clear about photo (use default)"
+            placeholder="/uploads/about.jpg"
+          />
         </section>
 
         <section className="grid gap-4 border border-sand-200 p-4 sm:grid-cols-2">
