@@ -23,7 +23,7 @@ export default async function LocaleLayout({
     <>
       <HtmlLang locale={locale} />
       <SiteHeader locale={locale} dict={dict} logoUrl={settings.logoUrl} />
-      <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+      <main className="flex-1 pt-[4.5rem] sm:pt-24">{children}</main>
       <SiteFooter locale={locale} dict={dict} settings={settings} />
     </>
   );

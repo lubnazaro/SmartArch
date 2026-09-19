@@ -24,11 +24,11 @@ At Smart Arch, we don't just design spaces. We create complete living experience
 export async function ensureSiteSettings(): Promise<SiteSettings> {
   const existing = await prisma.siteSettings.findUnique({ where: { id: "main" } });
   if (existing) {
-    if (!existing.aboutEn) {
-      return prisma.siteSettings.update({
-        where: { id: "main" },
-        data: { aboutEn: DEFAULT_ABOUT_EN },
-      });
+    const data: { aboutEn?: string; logoUrl?: string } = {};
+    if (!existing.aboutEn) data.aboutEn = DEFAULT_ABOUT_EN;
+    if (!existing.logoUrl) data.logoUrl = "/smart-arch-logo-web.png";
+    if (Object.keys(data).length) {
+      return prisma.siteSettings.update({ where: { id: "main" }, data });
     }
     return existing;
   }
@@ -36,6 +36,7 @@ export async function ensureSiteSettings(): Promise<SiteSettings> {
     data: {
       id: "main",
       aboutEn: DEFAULT_ABOUT_EN,
+      logoUrl: "/smart-arch-logo-web.png",
     },
   });
 }

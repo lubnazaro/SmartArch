@@ -42,21 +42,14 @@ export function SiteHeader({
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-sand-200/60 bg-sand-50/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6">
+      <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-4 sm:h-24 sm:px-6">
         <Link href={base} className="relative z-10 flex items-center gap-3">
-          {logoUrl ? (
-            // Custom uploaded logo
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoUrl}
-              alt="Smart Arch"
-              className="h-8 w-auto sm:h-9"
-            />
-          ) : (
-            <span className="font-display text-2xl tracking-tight text-ink sm:text-[1.7rem]">
-              Smart Arch
-            </span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoUrl || "/smart-arch-logo-web.png"}
+            alt="Smart Arch"
+            className="h-11 w-auto object-contain sm:h-14"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

@@ -31,6 +31,7 @@ async function main() {
       instagramHandle: "@smartarch.group",
       address: "Bethlehem / Jerusalem",
       aboutEn: ABOUT_EN,
+      logoUrl: "/smart-arch-logo-web.png",
       heroHeadlineEn: "Design meets technology",
       heroSubEn:
         "Architecture and interior design with seamless smart home systems for spaces that look beautiful and work beautifully.",
@@ -44,6 +45,7 @@ async function main() {
       instagramHandle: "@smartarch.group",
       address: "Bethlehem / Jerusalem",
       aboutEn: ABOUT_EN,
+      logoUrl: "/smart-arch-logo-web.png",
       heroHeadlineEn: "Design meets technology",
       heroSubEn:
         "Architecture and interior design with seamless smart home systems for spaces that look beautiful and work beautifully.",
